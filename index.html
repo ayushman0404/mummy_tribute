@@ -787,10 +787,12 @@
 <body>
 
   <!-- LOADING SCREEN -->
-  <div id="loader">
-    <div class="loader-text">Sangeeta Kumari</div>
+  <div id="loader" onclick="document.getElementById('bgMusic').play(); this.style.opacity='0'; this.style.visibility='hidden'">
+  <div style="text-align:center;">
+    <div class="loader-text" style="text-transform: capitalize;">To all mothers</div>
     <div class="loader-hint">Tap anywhere to enter</div>
   </div>
+</div>
   
   <!-- VINYL NOISE -->
   <div class="noise-overlay"></div>
@@ -1244,7 +1246,9 @@
 
     function startMusic() {
       if (playing) return;
+      bgMusic.muted = true;
       bgMusic.play().then(() => {
+        bgMusic.muted = false;
         btn.classList.add('playing');
         playing = true;
       }).catch(e => {
