@@ -684,14 +684,18 @@
     /* ── LOADING SCREEN ── */
     #loader {
       position: fixed; inset: 0; background: var(--bg-deep);
-      z-index: 100000; display: flex; align-items: center; justify-content: center;
-      transition: opacity 1.5s ease, visibility 1.5s;
+      z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: opacity 1.5s ease, visibility 1.5s;
     }
     .loader-text {
       font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 4rem);
       color: #d48292; letter-spacing: 4px;
       animation: pulseBreathe 2.5s infinite ease-in-out;
       text-shadow: 0 0 20px rgba(212, 130, 146, 0.4);
+    }
+    .loader-hint {
+      margin-top: 2rem; font-size: 0.9rem; letter-spacing: 5px; text-transform: uppercase; color: var(--muted);
+      opacity: 0; animation: fadeUp 1.5s ease forwards 1s;
     }
     @keyframes pulseBreathe {
       0%, 100% { opacity: 0.6; transform: scale(0.98); }
@@ -781,6 +785,7 @@
   <!-- LOADING SCREEN -->
   <div id="loader">
     <div class="loader-text">Sangeeta Kumari</div>
+    <div class="loader-hint">Tap anywhere to enter</div>
   </div>
   
   <!-- VINYL NOISE -->
@@ -1249,14 +1254,15 @@
 
     /* ── LOADING SCREEN ── */
     window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        if (loader) {
+      const loader = document.getElementById('loader');
+      if (loader) {
+        loader.addEventListener('click', () => {
+          if (!playing) startMusic();
           loader.style.opacity = '0';
           loader.style.visibility = 'hidden';
           setTimeout(() => loader.remove(), 1500);
-        }
-      }, 1500); // Cinematic delay
+        });
+      }
     });
 
     /* ── CUSTOM INTERACTIVE CURSOR ── */
