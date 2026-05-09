@@ -779,9 +779,12 @@
 <body>
 
   <!-- LOADING SCREEN -->
-  <div id="loader">
+  <div id="loader" onclick="document.getElementById('bgMusic').play(); this.style.opacity='0'; this.style.visibility='hidden'">
+  <div style="text-align:center;">
     <div class="loader-text">Sangeeta Kumari</div>
+    <p style="font-size:0.8rem; letter-spacing:3px; color:#d48292; margin-top:1rem; animation: pulseBreathe 2s infinite;">TAP TO BEGIN ♪</p>
   </div>
+</div>
   
   <!-- VINYL NOISE -->
   <div class="noise-overlay"></div>
