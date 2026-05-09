@@ -1238,7 +1238,9 @@
 
     function startMusic() {
       if (playing) return;
+      bgMusic.muted = true;
       bgMusic.play().then(() => {
+        bgMusic.muted = false;
         btn.classList.add('playing');
         playing = true;
       }).catch(e => {
