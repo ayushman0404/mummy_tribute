@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sangeeta Kumari — A Tribute</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --cream: #ffffff;
+      --warm: #fffafa;
+      --text: #4a4a4a;
+      --muted: rgba(74, 74, 74, 0.7);
+      --bg-deep: #faf8f5;
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.65);
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%;
+      overflow: hidden;
+      cursor: default;
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--bg-deep);
+      color: var(--text);
+    }
+
+    .reels-container {
+      height: 100vh;
+      width: 100vw;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+    }
+
+    /* ── CUSTOM SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+    }
+
+    /* ── MUSIC TOGGLE ── */
+    #musicBtn {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      font-family: serif;
+      user-select: none;
+    }
+
+    #musicBtn:hover {
+      transform: scale(1.08);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    #musicBtn.playing {
+      color: #d48292;
+      box-shadow: 0 0 18px rgba(212, 130, 146, 0.3);
+    }
+
+    /* ── REEL PROGRESS DOTS ── */
+    #dots {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      transition: all 0.4s;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background: #d48292;
+      border-color: #d48292;
+      transform: scale(1.5);
+    }
+
+    /* ── REELS ── */
+    .reel {
+      height: 100vh;
+      min-height: 600px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem 1.5rem;
+      transition: background 1s ease;
+    }
+
+    /* ── SCROLL HINT ── */
+    .hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 3s;
+      pointer-events: none;
+    }
+
+    .hint span {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hint-arrow {
+      width: 18px;
+      height: 18px;
+      border-right: 1.5px solid var(--muted);
+      border-bottom: 1.5px solid var(--muted);
+      transform: rotate(45deg);
+      animation: arrowBounce 1.5s ease-in-out infinite;
+    }
+
+    @keyframes arrowBounce {
+
+      0%,
+      100% {
+        transform: rotate(45deg) translate(0, 0);
+      }
+
+      50% {
+        transform: rotate(45deg) translate(3px, 3px);
+      }
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ── RAIN ANIMATION ── */
+    .rain-particle {
+      position: fixed;
+      bottom: -10vh;
+      z-index: 9999;
+      pointer-events: none;
+      animation: floatUp ease-in forwards;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(0.5) rotate(-15deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% {
+        transform: translateY(-120vh) scale(1.5) rotate(15deg);
+        opacity: 0;
+      }
+    }
+
+    /* ── ENTRANCE ANIMATIONS (Cinematic Blur Reveal) ── */
+    .enter {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(10px);
+      transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), filter 1.2s ease;
+    }
+
+    .enter.delay1 { transition-delay: 0.15s; }
+    .enter.delay2 { transition-delay: 0.3s; }
+    .enter.delay3 { transition-delay: 0.45s; }
+    .enter.delay4 { transition-delay: 0.6s; }
+    .enter.delay5 { transition-delay: 0.75s; }
+
+    .reel.visible .enter {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+    }
+
+    .enter-scale {
+      opacity: 0;
+      transform: scale(0.95);
+      filter: blur(15px);
+      transition: opacity 1.5s ease 0.2s, transform 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, filter 1.5s ease 0.2s;
+    }
+
+    .reel.visible .enter-scale {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0px);
+    }
+
+    /* Cinematic Line-by-Line Blur Reveal */
+    .blur-reveal {
+      opacity: 0;
+      filter: blur(20px);
+      transform: scale(0.95);
+      transition: opacity 2s ease, filter 2s ease, transform 2s ease;
+    }
+    .reel.visible .blur-reveal {
+      opacity: 1;
+      filter: blur(0px);
+      transform: scale(1);
+    }
+    
+    /* Cinematic Ken Burns Image Pan */
+    @keyframes kenBurns {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.1) translate(-2%, 2%); }
+    }
+    .reel.visible .portrait-photo img, .reel.visible .photo img {
+      animation: kenBurns 20s alternate infinite ease-in-out;
+    }
+
+    /* ── ORB GLOW ── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform;
+      filter: blur(60px);
+    }
+
+    /* ── FLOATING PARTICLES ── */
+    canvas#particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.8;
+    }
+
+    /* ── PHOTO SLOT (GLASSMORPHISM) ── */
+    .photo {
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .photo::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      animation: pulseRing 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseRing {
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.8;
+        transform: scale(1.03);
+      }
+    }
+
+    .photo-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .photo-inner svg {
+      width: 32px;
+      height: 32px;
+      opacity: 0.5;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+      margin: 0 auto;
+    }
+
+    /* ── TAG ── */
+    .tag {
+      font-size: 10px;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(12px) saturate(150%);
+      -webkit-backdrop-filter: blur(12px) saturate(150%);
+      border-top: 1px solid rgba(255, 255, 255, 0.8);
+      border-left: 1px solid rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      border-right: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      padding: 4px 18px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    /* ════════════════════════════
+     REEL 0 — INTRO (Light Pink)
+  ════════════════════════════ */
+    #r0 {
+      background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+    }
+
+    #r0 .curtain {
+      text-align: center;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .ladies {
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .presenting {
+      font-size: clamp(0.85rem, 2.5vw, 1rem);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .main-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.6rem, 10vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      color: #d48292;
+      text-shadow: 2px 4px 15px rgba(212, 130, 146, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .name-sub {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-style: italic;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .sparkle-ring {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+
+    .sparkle-ring:nth-child(2) {
+      width: 480px;
+      height: 480px;
+      animation-delay: 1s;
+    }
+
+    .sparkle-ring:nth-child(3) {
+      width: 620px;
+      height: 620px;
+      animation-delay: 2s;
+    }
+
+    @keyframes ringPulse {
+
+      0%,
+      100% {
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    /* ════════════════════════════
+     REEL 1 — FIRST LOVE (Light Blue)
+  ════════════════════════════ */
+    #r1 {
+      background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 2 — STRENGTH (Light Yellow)
+  ════════════════════════════ */
+    #r2 {
+      background: linear-gradient(135deg, #ffffe0 0%, #fffacd 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 3 — SACRIFICES (Light Orange)
+  ════════════════════════════ */
+    #r3 {
+      background: linear-gradient(135deg, #fff5ee 0%, #ffebcd 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 4 — HOME (Light Red)
+  ════════════════════════════ */
+    #r4 {
+      background: linear-gradient(135deg, #fff0f5 0%, #ffc0cb 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 5 — CHACHI
+  ════════════════════════════ */
+    #r5 {
+      background: linear-gradient(135deg, #fffaf0 0%, #ffe4e1 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 6 — BADI MUMMY
+  ════════════════════════════ */
+    #r6 {
+      background: linear-gradient(135deg, #fdf5e6 0%, #ffdab9 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 7 — DADI
+  ════════════════════════════ */
+    #r7 {
+      background: linear-gradient(160deg, #ffffff 0%, #fffaf0 50%, #fff0f5 100%);
+    }
+
+    /* ════════════════════════════
+     REEL 8 — HAPPY MOTHERS DAY
+  ════════════════════════════ */
+    #r8 {
+      background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 50%, #ffd1dc 100%);
+    }
+
+    .hmd-banner {
+      text-align: center;
+      padding: 1rem 2rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 40px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    }
+
+    .hmd-banner .hmd-main {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+      font-weight: 700;
+      color: #c97a88;
+      line-height: 1.2;
+    }
+
+    .hmd-banner .hmd-sub {
+      font-size: clamp(0.85rem, 2.2vw, 1rem);
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    /* ── REEL CONTENT BLOCKS ── */
+    .block, .curtain {
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      z-index: 2;
+      
+      /* Ultra Premium Glassmorphism */
+      padding: 3rem 2.5rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.15));
+      border-top: 1px solid rgba(255, 255, 255, 0.8);
+      border-left: 1px solid rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      border-right: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 32px;
+      backdrop-filter: blur(30px) saturate(150%);
+      -webkit-backdrop-filter: blur(30px) saturate(150%);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    }
+    
+    @media (max-width: 600px) {
+      .block, .curtain {
+        padding: 1.2rem 1rem;
+        width: 94%;
+        gap: 0.2rem;
+      }
+      .portrait-photo {
+        width: 220px !important;
+        height: 300px !important;
+      }
+      .photo, #slideshow {
+        width: 180px !important;
+        height: 180px !important;
+      }
+      .reel-body {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+      }
+      .reel-title {
+        font-size: clamp(1.6rem, 7vw, 2rem) !important;
+        margin: 0.5rem 0 !important;
+      }
+      .divider {
+        margin: 0.5rem 0 !important;
+      }
+      .tag {
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.6rem !important;
+      }
+      .hmd-banner {
+        margin-bottom: 1rem !important;
+      }
+      .hmd-main {
+        font-size: 2rem !important;
+      }
+      .photos {
+        margin-bottom: 0.5rem !important;
+      }
+    }
+
+    .reel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.9rem, 6vw, 3.4rem);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    .reel-title .g {
+      color: #d48292;
+    }
+
+    .reel-title em {
+      font-style: italic;
+      font-weight: 400;
+      color: #a49187;
+    }
+
+    .reel-body {
+      font-size: clamp(1.1rem, 3vw, 1.25rem);
+      line-height: 1.8;
+      color: #2c2525;
+      font-weight: 500;
+      font-style: italic;
+      max-width: 460px;
+      text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.9);
+    }
+
+    .photos {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── PORTRAIT PHOTO ── */
+    .portrait-photo {
+      width: 280px;
+      height: 380px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+      border-top: 1px solid rgba(255, 255, 255, 0.8);
+      border-left: 1px solid rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(15px) saturate(120%);
+      -webkit-backdrop-filter: blur(15px) saturate(120%);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      padding: 8px;
+    }
+
+    .portrait-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    /* ── FOOTER CREDIT ── */
+    .made-with {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ── SIDE LAYOUT for reel 1 ── */
+    @media (min-width: 620px) {
+      .side-layout {
+        flex-direction: row !important;
+        text-align: left !important;
+      }
+
+      .side-layout .block {
+        align-items: flex-start !important;
+        text-align: left !important;
+      }
+    }
+
+    /* ── LOADING SCREEN ── */
+    #loader {
+      position: fixed; inset: 0; background: var(--bg-deep);
+      z-index: 100000; display: flex; align-items: center; justify-content: center;
+      transition: opacity 1.5s ease, visibility 1.5s;
+    }
+    .loader-text {
+      font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 4rem);
+      color: #d48292; letter-spacing: 4px;
+      animation: pulseBreathe 2.5s infinite ease-in-out;
+      text-shadow: 0 0 20px rgba(212, 130, 146, 0.4);
+    }
+    @keyframes pulseBreathe {
+      0%, 100% { opacity: 0.6; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    /* ── VINYL NOISE ── */
+    .noise-overlay {
+      position: fixed; inset: 0; pointer-events: none; z-index: 99998; opacity: 0.04;
+      background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      #cursor-dot {
+        position: fixed; width: 6px; height: 6px; background: #d48292;
+        border-radius: 50%; pointer-events: none; z-index: 99999;
+        transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background 0.2s;
+        box-shadow: 0 0 10px rgba(212, 130, 146, 0.8);
+      }
+      #cursor-glow {
+        position: fixed; width: 40px; height: 40px; border: 1px solid rgba(212, 130, 146, 0.4);
+        border-radius: 50%; pointer-events: none; z-index: 99999;
+        transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background 0.3s;
+      }
+    }
+    @media (pointer: coarse) {
+      #cursor-dot, #cursor-glow { display: none; }
+    }
+
+    /* ── 3D HOVER PREP ── */
+    .block, .curtain {
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      will-change: transform, background;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* ── BREATHING & HOVER GLOW ── */
+    @keyframes deepBreathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    .main-name {
+      animation: deepBreathe 6s infinite ease-in-out;
+    }
+    
+    .portrait-photo {
+      transition: box-shadow 0.4s ease, transform 0.4s ease;
+    }
+    .portrait-photo:hover {
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2), inset 0 0 0 2px rgba(255,255,255,0.8);
+      transform: translateY(-5px);
+    }
+    
+    #musicBtn {
+      transition: all 0.3s ease;
+    }
+    #musicBtn:hover {
+      box-shadow: 0 0 20px rgba(212, 130, 146, 0.6);
+      transform: scale(1.1);
+    }
+    
+    /* ── EQ VISUALIZER ── */
+    .visualizer {
+      display: none; align-items: flex-end; justify-content: center;
+      gap: 2px; height: 14px; margin: auto;
+    }
+    .bar {
+      width: 3px; background: #d48292; border-radius: 2px;
+      animation: eq 0.6s infinite alternate ease-in-out;
+    }
+    .bar:nth-child(2) { animation-delay: 0.2s; }
+    .bar:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes eq {
+      0% { height: 3px; }
+      100% { height: 14px; }
+    }
+    #musicBtn.playing .visualizer { display: flex; }
+    #musicBtn.playing .note { display: none; }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loader">
+    <div class="loader-text">Sangeeta Kumari</div>
+  </div>
+  
+  <!-- VINYL NOISE -->
+  <div class="noise-overlay"></div>
+  
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-glow"></div>
+
+  <canvas id="particles"></canvas>
+
+  <audio id="bgMusic" src="vidssave.com Mumma - Kailash Kher (Lyrics) _ Lyrical Bam Hindi 256kbps.webm" loop
+    preload="auto"></audio>
+  <button id="musicBtn" title="Toggle ambient music" aria-label="Toggle music">
+    <span class="note">♪</span>
+    <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+  </button>
+
+  <nav id="dots" aria-label="Reel navigation">
+    <div class="dot active" data-reel="0" title="Intro"></div>
+    <div class="dot" data-reel="1" title="First Love"></div>
+    <div class="dot" data-reel="2" title="Strength"></div>
+    <div class="dot" data-reel="3" title="Sacrifices"></div>
+    <div class="dot" data-reel="4" title="Home"></div>
+    <div class="dot" data-reel="5" title="Quote"></div>
+    <div class="dot" data-reel="6" title="Chachi"></div>
+    <div class="dot" data-reel="7" title="Badi Mummy"></div>
+    <div class="dot" data-reel="8" title="Dadi"></div>
+    <div class="dot" data-reel="9" title="Happy Mother's Day"></div>
+  </nav>
+
+<main class="reels-container">
+  <!-- ════════ REEL 0 — GRAND INTRO ════════ -->
+  <section class="reel" id="r0">
+    <div class="orb"
+      style="width:500px;height:500px;background:radial-gradient(circle,rgba(255,255,255,0.8) 0%,transparent 70%);top:-100px;left:-120px;animation:orbFloat1 8s ease-in-out infinite;">
+    </div>
+    <div class="orb"
+      style="width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,0.6) 0%,transparent 70%);bottom:-80px;right:-80px;animation:orbFloat2 10s ease-in-out infinite;">
+    </div>
+    <div class="sparkle-ring"></div>
+    <div class="sparkle-ring"></div>
+    <div class="sparkle-ring"></div>
+
+    <div class="curtain">
+      <p class="ladies enter">✦ &nbsp; Ladies &amp; Gentlemen &nbsp; ✦</p>
+      <p class="presenting enter delay1">With great love &amp; honour, we are proud to present</p>
+      <h1 class="main-name enter delay2">Sangeeta<br>Kumari</h1>
+      <div class="divider enter delay3" style="width:220px;margin:0.4rem 0;"></div>
+      <p class="name-sub enter delay4">The woman who holds the whole world together</p>
+    </div>
+
+    <div class="hint">
+      <span>Scroll</span>
+      <div class="hint-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ════════ REEL 1 — FIRST LOVE ════════ -->
+  <section class="reel" id="r1">
+    <div class="orb"
+      style="width:420px;height:420px;background:radial-gradient(circle,rgba(255,255,255,0.6) 0%,transparent 70%);top:-60px;left:-80px;animation:orbFloat1 9s ease-in-out infinite;">
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:1.8rem;max-width:600px;width:100%;z-index:2;"
+      class="side-layout">
+      <div class="enter-scale">
+        <div class="photo" style="width:240px;height:240px;">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.21 AM.jpeg" alt="Mumma"
+            style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+      <div class="block" style="align-items:center;">
+        <span class="tag enter">Chapter 01</span>
+        <h2 class="reel-title enter delay1">My very first <span class="g">love.</span></h2>
+        <div class="divider enter delay2" style="width:50px;"></div>
+        <p class="reel-body enter delay3">Before I knew the world, I knew your face.<br>Your voice was my first
+          music,<br>your arms my first home.<br>You showed me what love truly looks like —<br>not in words, but in every
+          single thing you did.</p>
+        <div id="live-clock" class="blur-reveal" style="font-size: 0.85rem; font-family: monospace; color: rgba(255,255,255,0.8); margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem; width: 100%; text-align: center; letter-spacing: 2px; transition-delay: 1.5s;"></div>
+      </div>
+    </div>
+
+
+  </section>
+
+  <!-- ════════ REEL 2 — STRENGTH ════════ -->
+  <section class="reel" id="r2">
+    <div class="orb"
+      style="width:380px;height:380px;background:radial-gradient(circle,rgba(255,255,255,0.7) 0%,transparent 70%);bottom:-60px;right:-60px;animation:orbFloat2 11s ease-in-out infinite;">
+    </div>
+
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="photo" style="width:240px;height:240px;">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.13 AM (2).jpeg"
+            style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+      <span class="tag enter">Chapter 02</span>
+      <h2 class="reel-title enter delay1">Her strength is quiet,<br>but <span class="g">unbreakable.</span></h2>
+      <div class="divider enter delay2" style="width:50px;"></div>
+      <p class="reel-body enter delay3">She never called herself strong.<br>She just kept going — through every
+        storm,<br>every worry, every long sleepless night.<br>The pillar that never shook.<br>The light that never went
+        out.</p>
+    </div>
+
+
+  </section>
+
+  <!-- ════════ REEL 3 — SACRIFICES ════════ -->
+  <section class="reel" id="r3">
+    <div class="orb"
+      style="width:360px;height:360px;background:radial-gradient(circle,rgba(255,255,255,0.7) 0%,transparent 70%);top:-40px;right:-60px;animation:orbFloat1 12s ease-in-out infinite;">
+    </div>
+
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="photo" style="width:240px;height:240px;">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.13 AM.jpeg" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+      <span class="tag enter">Chapter 03</span>
+      <h2 class="reel-title enter delay1">The things she gave up<br><span class="g">for us.</span></h2>
+      <div class="divider enter delay2" style="width:50px;"></div>
+      <p class="reel-body enter delay3">Her sleep. Her comfort. Her own dreams —<br>always placed second without a
+        word.<br>She put us first before we even knew<br>what it meant to say thank you.<br>Every silent sacrifice was a
+        love letter<br>we are only just now learning to read.</p>
+    </div>
+
+
+  </section>
+
+  <!-- ════════ REEL 4 — HOME ════════ -->
+  <section class="reel" id="r4">
+    <div class="orb"
+      style="width:440px;height:440px;background:radial-gradient(circle,rgba(255,255,255,0.7) 0%,transparent 70%);bottom:-80px;left:-80px;animation:orbFloat2 9s ease-in-out infinite;">
+    </div>
+
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="photo" style="width:240px;height:240px;">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.13 AM (1).jpeg"
+            style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+      <span class="tag enter">Chapter 04</span>
+      <h2 class="reel-title enter delay1">Home isn't a place.<br>It's <span class="g">her.</span></h2>
+      <div class="divider enter delay2" style="width:50px;"></div>
+      <p class="reel-body enter delay3">That smell from the kitchen. The sound of her footsteps.<br>The way everything
+        feels safer when she's near.<br>Mumma, you didn't just make a house —<br>you made every room feel
+        like<br><em>belonging.</em></p>
+    </div>
+
+
+  </section>
+
+  <!-- ════════ REEL 4.5 — EMOTIONAL QUOTE ════════ -->
+  <section class="reel" id="quote-reel" style="background: linear-gradient(135deg, #2a2a2a 0%, #121212 100%);">
+    <div class="orb"
+      style="width:600px;height:600px;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%, -50%);animation:deepBreathe 8s infinite ease-in-out;">
+    </div>
+    <div class="block" style="background:transparent; border:none; box-shadow:none; backdrop-filter:none;">
+      <h2 class="reel-title" style="font-family:'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 3rem); font-style: italic; color:#fff; text-shadow: 0 5px 20px rgba(0,0,0,0.5); line-height: 1.6;">
+        <span class="blur-reveal" style="display:inline-block;">"God could not be everywhere,</span><br>
+        <span class="blur-reveal" style="display:inline-block; transition-delay: 0.8s;">and therefore he made mothers."</span>
+      </h2>
+    </div>
+  </section>
+
+  <!-- ════════ REEL 5 — CHACHI ════════ -->
+  <section class="reel" id="r5">
+    <div class="orb"
+      style="width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,0.7) 0%,transparent 70%);top:-80px;left:-80px;animation:orbFloat1 10s ease-in-out infinite;">
+    </div>
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="portrait-photo">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.12 AM.jpeg">
+        </div>
+      </div>
+      <span class="tag enter">Aunt</span>
+      <h2 class="reel-title enter delay1">Chachi</h2>
+      <div class="divider enter delay2" style="width:50px;"></div>
+      <p class="reel-body enter delay3">A heart full of warmth and laughter we treasure always.</p>
+    </div>
+
+  </section>
+
+  <!-- ════════ REEL 6 — BADI MUMMY ════════ -->
+  <section class="reel" id="r6">
+    <div class="orb"
+      style="width:420px;height:420px;background:radial-gradient(circle,rgba(255,255,255,0.7) 0%,transparent 70%);bottom:-60px;right:-80px;animation:orbFloat2 12s ease-in-out infinite;">
+    </div>
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="portrait-photo">
+          <img src="WhatsApp Image 2026-05-09 at 3.52.56 AM.jpeg">
+        </div>
+      </div>
+      <span class="tag enter">Elder Mother</span>
+      <h2 class="reel-title enter delay1">Badi Mummy</h2>
+      <div class="divider enter delay2" style="width:50px;"></div>
+      <p class="reel-body enter delay3" style="max-width:500px;">Her presence is our greatest blessing. With endless
+        love, comforting stories, and a heart full of warmth, she has always been our guiding light.</p>
+    </div>
+
+  </section>
+
+  <!-- ════════ REEL 7 — DADI ════════ -->
+  <section class="reel" id="r7">
+    <div class="orb"
+      style="width:500px;height:500px;background:radial-gradient(circle,rgba(255,255,255,0.8) 0%,transparent 70%);top:-100px;left:-120px;animation:orbFloat1 13s ease-in-out infinite;">
+    </div>
+
+    <div class="block">
+      <div class="photos enter-scale">
+        <div class="portrait-photo">
+          <img src="WhatsApp Image 2026-05-09 at 3.39.20 AM.jpeg">
+        </div>
+      </div>
+      <span class="tag enter delay1">Grandmother</span>
+      <h2 class="reel-title enter delay2">Dadi</h2>
+      <div class="divider enter delay3" style="width:50px;"></div>
+      <p class="reel-body enter delay4">The deep roots of our family tree — unshakeable &amp; eternal.</p>
+    </div>
+  </section>
+
+  <!-- ════════ REEL 8 — HAPPY MOTHERS DAY ════════ -->
+  <section class="reel" id="r8">
+    <div class="orb"
+      style="width:500px;height:500px;background:radial-gradient(circle,rgba(255,255,255,0.8) 0%,transparent 70%);bottom:-100px;right:-120px;animation:orbFloat2 15s ease-in-out infinite;">
+    </div>
+
+    <div class="block">
+      <div class="photos enter-scale" style="margin-bottom: 2rem;">
+        <div class="portrait-photo" id="slideshow" style="position: relative; width:260px; height:260px; overflow:hidden;">
+          <!-- JS injects images here -->
+        </div>
+      </div>
+      <div class="hmd-banner enter" style="margin-bottom:2rem;">
+        <div class="hmd-main" style="font-size:clamp(2rem, 6vw, 3rem);">Happy Mother&#39;s Day 💛</div>
+      </div>
+      <p class="reel-body enter delay1" style="max-width: 500px; font-size: 1.3rem;">
+        We don't say it enough, but you are the glue that holds us together.<br>
+        The quiet strength we lean on,<br>
+        The endless love we need every single day.<br><br>
+        To every mother, grandmother, and aunt —<br>
+        Thank you for everything.
+      </p>
+      <p class="made-with enter delay3" style="color:rgba(140,90,0,0.5); margin-top:3rem;">Made with love ✦ for you,
+        always</p>
+    </div>
+  </section>
+</main>
+
+  <style>
+    @keyframes orbFloat1 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(20px, 15px);
+      }
+    }
+
+    @keyframes orbFloat2 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(-15px, 20px);
+      }
+    }
+  </style>
+
+  <script>
+    /* ── PARTICLES & PARALLAX ── */
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+    let mouseX = -1000, mouseY = -1000;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (window.matchMedia("(pointer: fine)").matches) {
+        document.querySelectorAll('.orb').forEach((orb, i) => {
+          const speed = (i + 1) * -0.015;
+          orb.style.marginLeft = (mouseX * speed) + 'px';
+          orb.style.marginTop = (mouseY * speed) + 'px';
+        });
+      }
+    });
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 55; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: 0.5 + Math.random() * 1.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: -0.1 - Math.random() * 0.3,
+        alpha: 0.1 + Math.random() * 0.5,
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => {
+        p.pulse += 0.012;
+        p.x += p.vx; p.y += p.vy;
+        
+        const dx = p.x - mouseX;
+        const dy = p.y - mouseY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          p.x += (dx / dist) * 1.5;
+          p.y += (dy / dist) * 1.5;
+        }
+
+        if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        const a = p.alpha * (0.5 + 0.5 * Math.sin(p.pulse));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+
+    /* ── THEMATIC RAIN EFFECT ── */
+    const rainConfigs = {
+      1: { char: '❤️', color: '#ff3366', shadow: 'rgba(255, 51, 102, 0.5)', count: 35 },
+      2: { char: '✨', color: '#ffd700', shadow: 'rgba(255, 215, 0, 0.5)', count: 40 },
+      3: { char: '🪶', color: '#ffffff', shadow: 'rgba(255, 255, 255, 0.8)', count: 25 },
+      4: { char: '🌻', color: '#ffcc00', shadow: 'rgba(255, 204, 0, 0.5)', count: 30 },
+      5: { char: '💫', color: '#ffffff', shadow: 'rgba(255, 255, 255, 0.8)', count: 45 },
+      6: { char: '🌼', color: '#ffffff', shadow: 'rgba(255, 255, 255, 0.5)', count: 30 },
+      7: { char: '🌸', color: '#ffb6c1', shadow: 'rgba(255, 182, 193, 0.5)', count: 35 },
+      8: { char: '🕊️', color: '#ffffff', shadow: 'rgba(255, 255, 255, 0.8)', count: 20 },
+      9: { char: '💖', color: '#ff69b4', shadow: 'rgba(255, 105, 180, 0.6)', count: 50 }
+    };
+
+    let triggeredReels = new Set();
+
+    function triggerRainEffect(idx) {
+      if (triggeredReels.has(idx) || !rainConfigs[idx]) return;
+      triggeredReels.add(idx);
+      
+      const config = rainConfigs[idx];
+      const container = document.body;
+      
+      for (let i = 0; i < config.count; i++) {
+        const particle = document.createElement('div');
+        particle.innerHTML = config.char;
+        particle.className = 'rain-particle';
+        particle.style.color = config.color;
+        particle.style.textShadow = `0 0 10px ${config.shadow}`;
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        particle.style.animationDuration = (Math.random() * 2.5 + 2.5) + 's';
+        particle.style.animationDelay = (Math.random() * 0.8) + 's';
+        container.appendChild(particle);
+        setTimeout(() => particle.remove(), 6000);
+      }
+    }
+
+    /* ── SCROLL SNAP OBSERVER ── */
+    const reels = document.querySelectorAll('.reel');
+    const dotEls = document.querySelectorAll('.dot');
+    let currentReelIndex = 0;
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          const idx = [...reels].indexOf(e.target);
+          currentReelIndex = idx;
+          dotEls.forEach((d, i) => d.classList.toggle('active', i === idx));
+          
+          if (idx > 0) {
+            triggerRainEffect(idx);
+          } else if (idx === 0) {
+            triggeredReels.clear(); // Reset all effects if they return to the start
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    reels.forEach(r => obs.observe(r));
+    setTimeout(() => reels[0].classList.add('visible'), 80);
+
+    dotEls.forEach(d => {
+      d.addEventListener('click', () => {
+        reels[+d.dataset.reel].scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    /* ── FULL PAGE SCROLL JACKING (DESKTOP) ── */
+    const container = document.querySelector('.reels-container');
+    let isScrolling = false;
+    let scrollTimeout;
+
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      
+      if (!isScrolling) {
+        if (Math.abs(e.deltaY) > 5) {
+          isScrolling = true;
+          if (e.deltaY > 0) {
+            if (currentReelIndex < reels.length - 1) {
+              currentReelIndex++;
+              reels[currentReelIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+          } else if (e.deltaY < 0) {
+            if (currentReelIndex > 0) {
+              currentReelIndex--;
+              reels[currentReelIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        }
+      }
+      
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 80);
+      
+    }, { passive: false });
+
+    /* ── MUSIC AUTOPLAY & TOGGLE ── */
+    const btn = document.getElementById('musicBtn');
+    const bgMusic = document.getElementById('bgMusic');
+    let playing = false;
+
+    function startMusic() {
+      if (playing) return;
+      bgMusic.play().then(() => {
+        btn.classList.add('playing');
+        playing = true;
+      }).catch(e => {
+        console.log("Autoplay blocked:", e);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      startMusic();
+    });
+
+    /* ── LOADING SCREEN ── */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.visibility = 'hidden';
+          setTimeout(() => loader.remove(), 1500);
+        }
+      }, 1500); // Cinematic delay
+    });
+
+    /* ── CUSTOM INTERACTIVE CURSOR ── */
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorGlow = document.getElementById('cursor-glow');
+    if (window.matchMedia("(pointer: fine)").matches && cursorDot && cursorGlow) {
+      window.addEventListener('mousemove', (e) => {
+        cursorDot.style.left = e.clientX + 'px';
+        cursorDot.style.top = e.clientY + 'px';
+        cursorGlow.style.left = e.clientX + 'px';
+        cursorGlow.style.top = e.clientY + 'px';
+      });
+
+      document.querySelectorAll('button, .dot').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursorGlow.style.width = '60px'; cursorGlow.style.height = '60px';
+          cursorGlow.style.background = 'rgba(212, 130, 146, 0.15)';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursorGlow.style.width = '40px'; cursorGlow.style.height = '40px';
+          cursorGlow.style.background = 'transparent';
+        });
+      });
+    }
+
+    /* ── 3D HOVER TILT & SPOTLIGHT ── */
+    document.querySelectorAll('.block, .curtain').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        if (!window.matchMedia("(pointer: fine)").matches) return; // Ignore on touch
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Gentle tilt (max 4 degrees)
+        const rotateX = ((y - centerY) / centerY) * -4;
+        const rotateY = ((x - centerX) / centerX) * 4;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        card.style.transition = 'transform 0.1s ease-out, background 0.1s';
+        
+        // Dynamic spotlight base gradient
+        card.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 60%)`;
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        if (!window.matchMedia("(pointer: fine)").matches) return;
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        card.style.transition = `transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), background 0.6s`;
+        card.style.background = `linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.15))`;
+      });
+    });
+
+    document.body.addEventListener('click', () => {
+      if (!playing) startMusic();
+    }, { once: true });
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!playing) {
+        startMusic();
+      } else {
+        bgMusic.pause();
+        btn.classList.remove('playing');
+        playing = false;
+      }
+    });
+
+    /* ── LIVE CLOCK LOGIC ── */
+    const clockEl = document.getElementById('live-clock');
+    const startDate = new Date(new Date().getFullYear() - 25, 0, 1); // Mock 25 years ago
+    if (clockEl) {
+      setInterval(() => {
+        const now = new Date();
+        const diff = now - startDate;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+        const mins = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+        const secs = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+        clockEl.textContent = `Time Loved: ${days} days, ${hours}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    /* ── AUTO SLIDESHOW LOGIC ── */
+    const slideshowImages = [
+      "WhatsApp Image 2026-05-09 at 3.39.12 AM.jpeg",
+      "WhatsApp Image 2026-05-09 at 3.39.13 AM (1).jpeg",
+      "WhatsApp Image 2026-05-09 at 3.39.13 AM (2).jpeg",
+      "WhatsApp Image 2026-05-09 at 3.39.13 AM.jpeg",
+      "WhatsApp Image 2026-05-09 at 3.39.20 AM.jpeg",
+      "WhatsApp Image 2026-05-09 at 3.39.21 AM.jpeg",
+      "WhatsApp Image 2026-05-09 at 3.52.56 AM.jpeg"
+    ];
+    const slideshowEl = document.getElementById('slideshow');
+    if (slideshowEl) {
+      slideshowImages.forEach((src, i) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.position = 'absolute';
+        img.style.inset = '0';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.opacity = i === 0 ? '1' : '0';
+        img.style.transition = 'opacity 2.5s ease-in-out';
+        // Add ken burns to slideshow as well!
+        img.style.animation = 'kenBurns 20s alternate infinite ease-in-out';
+        slideshowEl.appendChild(img);
+      });
+      
+      let currentSlide = 0;
+      setInterval(() => {
+        const imgs = slideshowEl.querySelectorAll('img');
+        if (imgs.length === 0) return;
+        imgs[currentSlide].style.opacity = '0';
+        currentSlide = (currentSlide + 1) % imgs.length;
+        imgs[currentSlide].style.opacity = '1';
+      }, 5000); // 5 seconds per slide
+    }
+  </script>
+</body>
+
+</html>
