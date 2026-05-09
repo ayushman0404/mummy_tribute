@@ -695,7 +695,11 @@
     }
     .loader-hint {
       margin-top: 2rem; font-size: 0.9rem; letter-spacing: 5px; text-transform: uppercase; color: var(--muted);
-      opacity: 0; animation: fadeUp 1.5s ease forwards 1s;
+      opacity: 0; animation: fadeUp 1.5s ease forwards 1s, pulseHint 2s infinite 2.5s;
+    }
+    @keyframes pulseHint {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
     }
     @keyframes pulseBreathe {
       0%, 100% { opacity: 0.6; transform: scale(0.98); }
